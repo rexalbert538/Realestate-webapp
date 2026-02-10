@@ -130,7 +130,7 @@ const Dashboard: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4">{listing.address.split(',')[1] || 'USA'}</td>
-                  <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">${listing.price.toLocaleString()}</td>
+                  <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">₦{listing.price.toLocaleString()}</td>
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
                       ${listing.status === 'Active' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 

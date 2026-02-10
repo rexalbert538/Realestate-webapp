@@ -29,6 +29,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error("Failed to parse session", e);
         localStorage.removeItem('estate_admin_session');
       }
+    } else {
+      // Auto-login for preview purposes
+      const defaultUser = { name: 'Alex Morgan', email: 'alex@estate.com' };
+      setUser(defaultUser);
+      localStorage.setItem('estate_admin_session', JSON.stringify(defaultUser));
     }
     setIsLoading(false);
   }, []);

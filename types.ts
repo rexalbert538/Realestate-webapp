@@ -1,3 +1,4 @@
+
 export interface Listing {
   id: string;
   title: string;
@@ -8,7 +9,8 @@ export interface Listing {
   bedrooms?: number;
   bathrooms?: number;
   sqft?: number;
-  image: string;
+  image: string; // This acts as the "Cover" image
+  images?: string[]; // Array of additional images
   dateAdded: string;
   description?: string;
   amenities?: string[];

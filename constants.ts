@@ -30,7 +30,7 @@ export const MOCK_STATS: Stat[] = [
   },
   {
     label: "Revenue",
-    value: "$45,200",
+    value: "₦45,200",
     trend: "+18% this month",
     trendDirection: "up",
     icon: "attach_money",

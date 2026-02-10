@@ -14,24 +14,32 @@ const ListingsContext = createContext<ListingsContextType | undefined>(undefined
 
 export const ListingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [listings, setListings] = useState<Listing[]>([]);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Initialize with fake data
   useEffect(() => {
     // Check if we have data in local storage, otherwise use constants
     const stored = localStorage.getItem('estate_admin_listings');
     if (stored) {
-      setListings(JSON.parse(stored));
+      try {
+        setListings(JSON.parse(stored));
+      } catch (e) {
+        console.error("Failed to parse listings from local storage", e);
+        setListings(LISTINGS);
+      }
     } else {
       setListings(LISTINGS);
     }
+    setIsInitialized(true);
   }, []);
 
   // Sync to local storage
   useEffect(() => {
-    if (listings.length > 0) {
+    // Only sync if initialized to prevent overwriting with empty state on mount
+    if (isInitialized) {
       localStorage.setItem('estate_admin_listings', JSON.stringify(listings));
     }
-  }, [listings]);
+  }, [listings, isInitialized]);
 
   const addListing = (data: Omit<Listing, 'id' | 'dateAdded'>) => {
     const newListing: Listing = {

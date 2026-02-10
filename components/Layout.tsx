@@ -157,19 +157,6 @@ const Layout: React.FC = () => {
                 <span className="text-sm font-medium text-slate-600 dark:text-slate-300 hidden sm:block">Oct 24, 2023</span>
               </div>
             )}
-             {/* Leads Header Actions */}
-             {location.pathname === '/leads' && (
-                <div className="flex items-center gap-3">
-                  <button className="p-2 text-slate-500 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors relative">
-                    <span className="material-icons-round">notifications</span>
-                    <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full"></span>
-                  </button>
-                  <button className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-blue-600 shadow-sm shadow-primary/30 transition-colors flex items-center gap-2">
-                    <span className="material-icons-round text-sm">add</span>
-                    Add Lead
-                  </button>
-                </div>
-             )}
              {/* Settings Header Actions */}
              {location.pathname === '/settings' && (
                 <div className="flex items-center gap-3">
@@ -177,19 +164,6 @@ const Layout: React.FC = () => {
                     <span className="material-icons-round text-sm">save</span>
                     Save Changes
                   </button>
-                </div>
-             )}
-              {/* Listings Header Actions */}
-              {location.pathname === '/listings' && (
-                <div className="flex items-center gap-3">
-                  <button className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                    <span className="material-icons-round text-sm">filter_list</span>
-                    Filter
-                  </button>
-                  <NavLink to="/listings/new" className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-blue-600 shadow-sm shadow-primary/30 transition-colors flex items-center gap-2">
-                    <span className="material-icons-round text-sm">add</span>
-                    New Listing
-                  </NavLink>
                 </div>
              )}
           </div>
