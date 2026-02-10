@@ -10,6 +10,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ListingsProvider } from './context/ListingsContext';
+import { LeadsProvider } from './context/LeadsContext';
+import { ActivityProvider } from './context/ActivityContext';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -36,28 +38,32 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <ListingsProvider>
-        <HashRouter>
-          <ScrollToTop />
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/" element={
-              <ProtectedRoute>
-                <Layout />
-              </ProtectedRoute>
-            }>
-              <Route index element={<Dashboard />} />
-              <Route path="listings" element={<Listings />} />
-              <Route path="listings/new" element={<AddListing />} />
-              <Route path="listings/edit/:id" element={<AddListing />} />
-              <Route path="leads" element={<Leads />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </HashRouter>
-      </ListingsProvider>
+      <ActivityProvider>
+        <ListingsProvider>
+          <LeadsProvider>
+            <HashRouter>
+              <ScrollToTop />
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <Layout />
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<Dashboard />} />
+                  <Route path="listings" element={<Listings />} />
+                  <Route path="listings/new" element={<AddListing />} />
+                  <Route path="listings/edit/:id" element={<AddListing />} />
+                  <Route path="leads" element={<Leads />} />
+                  <Route path="settings" element={<Settings />} />
+                </Route>
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </HashRouter>
+          </LeadsProvider>
+        </ListingsProvider>
+      </ActivityProvider>
     </AuthProvider>
   );
 };

@@ -1,8 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-interface User {
+export interface User {
   name: string;
   email: string;
+  phone?: string;
+  bio?: string;
+  avatar?: string;
 }
 
 interface AuthContextType {
@@ -10,6 +13,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
+  updateProfile: (data: Partial<User>) => void;
   isLoading: boolean;
 }
 
@@ -31,7 +35,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } else {
       // Auto-login for preview purposes
-      const defaultUser = { name: 'Alex Morgan', email: 'alex@estate.com' };
+      const defaultUser = { 
+          name: 'Alex Morgan', 
+          email: 'alex@estate.com',
+          phone: '+1 (555) 123-4567',
+          bio: 'Senior Real Estate Agent with 10+ years of experience in luxury residential properties.'
+      };
       setUser(defaultUser);
       localStorage.setItem('estate_admin_session', JSON.stringify(defaultUser));
     }
@@ -54,7 +63,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // For demo purposes, allow a default admin login if no users exist or match matches hardcoded mock
     if (email === 'alex@estate.com' && password === 'password') {
-       const defaultUser = { name: 'Alex Morgan', email: 'alex@estate.com' };
+       const defaultUser = { 
+           name: 'Alex Morgan', 
+           email: 'alex@estate.com',
+           phone: '+1 (555) 123-4567',
+           bio: 'Senior Real Estate Agent with 10+ years of experience in luxury residential properties.'
+       };
        setUser(defaultUser);
        localStorage.setItem('estate_admin_session', JSON.stringify(defaultUser));
        return true;
@@ -88,8 +102,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('estate_admin_session');
   };
 
+  const updateProfile = (data: Partial<User>) => {
+    if (user) {
+      const updatedUser = { ...user, ...data };
+      setUser(updatedUser);
+      localStorage.setItem('estate_admin_session', JSON.stringify(updatedUser));
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, updateProfile, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,18 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { LEADS } from '../constants';
-import { Lead, Note } from '../types';
+import { Lead } from '../types';
+import { useLeads } from '../context/LeadsContext';
 
 const Leads: React.FC = () => {
-  // State
-  const [leads, setLeads] = useState<Lead[]>(LEADS);
+  // Use Global Context
+  const { leads, addLead, deleteLead } = useLeads();
+  
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [showMobileDetail, setShowMobileDetail] = useState(false);
   const [headerActionsContainer, setHeaderActionsContainer] = useState<Element | null>(null);
-  
-  // UI State
-  const [activeTab, setActiveTab] = useState<'activity' | 'notes' | 'files'>('notes');
-  const [noteInput, setNoteInput] = useState('');
   
   // Filter State
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,7 +34,7 @@ const Leads: React.FC = () => {
     if (!selectedLeadId && leads.length > 0 && window.innerWidth >= 1280) {
       setSelectedLeadId(leads[0].id);
     }
-  }, []);
+  }, [leads]); // Added leads as dependency to select first lead when loaded
 
   // Filter Logic
   const filteredLeads = useMemo(() => {
@@ -64,31 +61,19 @@ const Leads: React.FC = () => {
     setShowMobileDetail(false);
   };
 
-  const handleAddNote = () => {
-    if (!noteInput.trim() || !selectedLead) return;
-
-    const newNote: Note = {
-      id: Date.now().toString(),
-      text: noteInput,
-      date: 'Just now',
-      type: 'user'
-    };
-
-    setLeads(prev => prev.map(l => {
-      if (l.id === selectedLead.id) {
-        return { ...l, notes: [newNote, ...(l.notes || [])] };
-      }
-      return l;
-    }));
-    setNoteInput('');
-  };
-
   const handleDeleteLead = () => {
     if (!selectedLead) return;
     if (window.confirm(`Are you sure you want to delete ${selectedLead.name}?`)) {
-      setLeads(prev => prev.filter(l => l.id !== selectedLead.id));
+      deleteLead(selectedLead.id);
       if (showMobileDetail) setShowMobileDetail(false);
-      setSelectedLeadId(null);
+      
+      // If we deleted the selected lead, select the next available or null
+      if (filteredLeads.length > 1) {
+          const nextLead = filteredLeads.find(l => l.id !== selectedLead.id);
+          setSelectedLeadId(nextLead ? nextLead.id : null);
+      } else {
+          setSelectedLeadId(null);
+      }
     }
   };
 
@@ -105,12 +90,13 @@ const Leads: React.FC = () => {
         status: newLeadData.status as any || 'New',
         source: newLeadData.source as any || 'Website',
         date: 'Just now',
+        timestamp: Date.now(),
         avatarColor: 'bg-slate-200 text-slate-600',
         avatarText: (newLeadData.name || 'NL').substring(0,2).toUpperCase(),
         notes: []
     };
     
-    setLeads([newLead, ...leads]);
+    addLead(newLead);
     setIsAddModalOpen(false);
     setSelectedLeadId(newLead.id);
     setNewLeadData({
@@ -120,10 +106,6 @@ const Leads: React.FC = () => {
 
   const HeaderButtons = () => (
     <>
-        <button className="p-2 text-slate-500 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors relative">
-        <span className="material-icons-round">notifications</span>
-        <span className="absolute top-2 right-2 h-2 w-2 bg-red-500 rounded-full"></span>
-        </button>
         <button 
             onClick={() => setIsAddModalOpen(true)}
             className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-blue-600 shadow-sm shadow-primary/30 transition-colors flex items-center gap-2"
@@ -309,10 +291,15 @@ const Leads: React.FC = () => {
 
       {/* Lead Detail Panel (Right Side) */}
       {/* Mobile: Full Screen Overlay / Desktop: Side Panel */}
-      <div className={`w-full xl:w-96 border-l border-slate-200 dark:border-slate-700 bg-white dark:bg-[#15202b] flex-col ${showMobileDetail ? 'flex absolute inset-0 z-20' : 'hidden xl:flex'}`}>
+      <div className={`
+        w-full xl:w-96 
+        border-l border-slate-200 dark:border-slate-700 
+        bg-white dark:bg-[#15202b] 
+        flex-col 
+        ${showMobileDetail ? 'flex absolute inset-0 z-20 xl:static xl:z-auto' : 'hidden xl:flex'}
+      `}>
          
-         {/* Detail Header */}
-         <div className="p-6 border-b border-slate-200 dark:border-slate-700">
+         <div className="p-6 h-full overflow-y-auto">
             {/* Mobile Back Button */}
             <div className="xl:hidden mb-4">
                 <button onClick={handleBackToDesktop} className="flex items-center text-sm text-slate-500 hover:text-primary">
@@ -400,87 +387,6 @@ const Leads: React.FC = () => {
                 <div className="text-center py-12 text-slate-400">Select a lead to view details</div>
             )}
          </div>
-         
-         {selectedLead && (
-            <div className="flex-1 flex flex-col min-h-0 bg-slate-50 dark:bg-slate-900/20">
-                <div className="px-6 pt-4">
-                <div className="flex gap-6 border-b border-slate-200 dark:border-slate-700">
-                    <button 
-                        onClick={() => setActiveTab('activity')}
-                        className={`pb-2 text-sm font-medium transition-colors ${activeTab === 'activity' ? 'text-primary border-b-2 border-primary' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'}`}
-                    >
-                        Activity
-                    </button>
-                    <button 
-                        onClick={() => setActiveTab('notes')}
-                        className={`pb-2 text-sm font-medium transition-colors ${activeTab === 'notes' ? 'text-primary border-b-2 border-primary' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'}`}
-                    >
-                        Notes
-                    </button>
-                    <button 
-                        onClick={() => setActiveTab('files')}
-                        className={`pb-2 text-sm font-medium transition-colors ${activeTab === 'files' ? 'text-primary border-b-2 border-primary' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'}`}
-                    >
-                        Files
-                    </button>
-                </div>
-                </div>
-                
-                <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                   {activeTab === 'notes' && (
-                        <>
-                             {selectedLead.notes && selectedLead.notes.length > 0 ? (
-                                selectedLead.notes.map((note) => (
-                                    <div key={note.id} className="flex gap-3 animate-[fadeIn_0.2s_ease-out]">
-                                        <div className="mt-1 flex flex-col items-center">
-                                        <div className={`h-2 w-2 rounded-full ring-4 ring-white dark:ring-[#15202b] ${note.type === 'user' ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-600'}`}></div>
-                                        <div className="h-full w-px bg-slate-200 dark:bg-slate-700 my-1"></div>
-                                        </div>
-                                        <div className="pb-4">
-                                        <p className="text-xs text-slate-400 mb-1">{note.date}</p>
-                                        <p className="text-sm text-slate-800 dark:text-slate-200">
-                                            {note.text}
-                                        </p>
-                                        </div>
-                                    </div>
-                                ))
-                            ) : (
-                                <div className="text-center text-slate-400 text-sm py-8 italic">No notes added yet.</div>
-                            )}
-                        </>
-                   )}
-                   
-                   {activeTab === 'activity' && (
-                       <div className="text-center text-slate-400 text-sm py-8 italic">Activity log coming soon.</div>
-                   )}
-                   
-                   {activeTab === 'files' && (
-                       <div className="text-center text-slate-400 text-sm py-8 italic">No files attached.</div>
-                   )}
-                </div>
-                
-                {activeTab === 'notes' && (
-                    <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-[#15202b]">
-                        <div className="relative">
-                            <input 
-                                type="text" 
-                                value={noteInput}
-                                onChange={(e) => setNoteInput(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleAddNote()}
-                                placeholder="Add a note..." 
-                                className="w-full pl-4 pr-10 py-2 text-sm bg-slate-100 dark:bg-slate-800 border-transparent rounded-full focus:bg-white dark:focus:bg-slate-900 focus:border-primary focus:ring-0 transition-colors text-slate-900 dark:text-white" 
-                            />
-                            <button 
-                                onClick={handleAddNote}
-                                className="absolute right-2 top-1.5 p-1 text-primary hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full"
-                            >
-                                <span className="material-icons-round text-lg">send</span>
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </div>
-         )}
       </div>
     </div>
   );

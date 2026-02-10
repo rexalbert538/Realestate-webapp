@@ -135,6 +135,9 @@ export const LISTINGS: Listing[] = [
   }
 ];
 
+const now = new Date();
+const oneDay = 24 * 60 * 60 * 1000;
+
 export const LEADS: Lead[] = [
   {
     id: "1",
@@ -147,6 +150,7 @@ export const LEADS: Lead[] = [
     status: "New",
     source: "Website",
     date: "2 mins ago",
+    timestamp: now.getTime() - (2 * 60 * 1000), // 2 mins ago
     avatarColor: "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400",
     avatarText: "JD",
     notes: [
@@ -165,6 +169,7 @@ export const LEADS: Lead[] = [
     status: "Contacted",
     source: "Zillow",
     date: "Yesterday",
+    timestamp: now.getTime() - oneDay, // 1 day ago
     avatarColor: "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400",
     avatarText: "RS",
     notes: []
@@ -180,6 +185,7 @@ export const LEADS: Lead[] = [
     status: "Qualified",
     source: "Website",
     date: "Oct 24",
+    timestamp: now.getTime() - (2 * oneDay), // 2 days ago
     avatarColor: "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400",
     avatarText: "AL",
     notes: []
@@ -195,6 +201,7 @@ export const LEADS: Lead[] = [
     status: "Closed",
     source: "Referral",
     date: "Oct 20",
+    timestamp: now.getTime() - (6 * oneDay), // 6 days ago
     avatarColor: "bg-slate-100 dark:bg-slate-800 text-slate-500",
     avatarText: "MK",
     notes: []
@@ -210,6 +217,7 @@ export const LEADS: Lead[] = [
     status: "New",
     source: "Zillow",
     date: "Oct 18",
+    timestamp: now.getTime() - (8 * oneDay), // 8 days ago
     avatarColor: "bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400",
     avatarText: "SB",
     notes: []

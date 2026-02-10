@@ -30,6 +30,7 @@ export interface Lead {
   status: 'New' | 'Contacted' | 'Qualified' | 'Closed';
   source: 'Website' | 'Zillow' | 'Referral';
   date: string;
+  timestamp: number;
   avatarColor: string;
   avatarText: string;
   notes?: Note[];
