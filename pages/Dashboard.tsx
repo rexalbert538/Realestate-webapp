@@ -9,7 +9,7 @@ import { Stat } from '../types';
 const Dashboard: React.FC = () => {
   const { listings } = useListings();
   const { leads } = useLeads();
-  const { activities } = useActivity();
+  const { activities, refreshActivities, isLoading } = useActivity();
   const [filterDays, setFilterDays] = useState(30);
 
   // Calculate Dynamic Stats
@@ -190,10 +190,10 @@ const Dashboard: React.FC = () => {
             <h2 className="text-lg font-bold text-slate-900 dark:text-white">Recent Activity</h2>
             <Link to="/settings" className="text-sm text-primary hover:text-blue-600 font-medium">View Settings</Link>
           </div>
-          <div className="space-y-6 relative max-h-[350px] overflow-y-auto no-scrollbar pr-2">
+          <div className="space-y-6 relative max-h-[350px] overflow-y-auto pr-2">
             <div className="absolute left-4 top-2 bottom-2 w-0.5 bg-slate-100 dark:bg-slate-700"></div>
-            {activities.length > 0 ? activities.slice(0, 6).map((activity) => (
-              <div key={activity.id} className="relative flex gap-4">
+            {activities.length > 0 ? activities.map((activity) => (
+              <div key={activity.id} className="relative flex gap-4 animate-[fadeIn_0.3s_ease-out]">
                 <div className={`h-8 w-8 rounded-full border-2 border-white dark:border-[#15202b] flex items-center justify-center shrink-0 z-10 ${activity.bgClass}`}>
                   <span className={`material-icons-round text-sm ${activity.colorClass}`}>{activity.icon}</span>
                 </div>
@@ -208,8 +208,22 @@ const Dashboard: React.FC = () => {
             )}
           </div>
           <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700">
-            <button className="block w-full py-2 text-center text-sm text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
-              Refresh Activity
+            <button 
+                onClick={refreshActivities}
+                disabled={isLoading}
+                className="w-full py-2 text-center text-sm text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                  <>
+                    <span className="h-4 w-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></span>
+                    Refreshing...
+                  </>
+              ) : (
+                  <>
+                    <span className="material-icons-round text-sm">refresh</span>
+                    Refresh Activity
+                  </>
+              )}
             </button>
           </div>
         </div>
