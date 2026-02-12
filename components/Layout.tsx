@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
-import { Outlet, NavLink, useLocation, useNavigate, matchPath } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate, matchPath } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useActivity } from '../context/ActivityContext';
 import { useLeads } from '../context/LeadsContext';
 
-const Layout: React.FC = () => {
+interface LayoutProps {
+  children?: React.ReactNode;
+}
+
+const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const location = useLocation();
@@ -12,6 +16,17 @@ const Layout: React.FC = () => {
   const { user, logout } = useAuth();
   const { notifications, unreadCount, markAllNotificationsRead } = useActivity();
   const { leads } = useLeads();
+  const [currentDate, setCurrentDate] = useState('');
+
+  useEffect(() => {
+    // Set date on mount to avoid hydration mismatch scenarios and ensure it's current
+    const date = new Date();
+    setCurrentDate(date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      year: 'numeric' 
+    }));
+  }, []);
 
   // Calculate new leads for sidebar badge
   const newLeadsCount = leads.filter(l => l.status === 'New').length;
@@ -43,82 +58,66 @@ const Layout: React.FC = () => {
     }
   };
 
-  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+  const isLinkActive = (path: string, end = false) => {
+    return !!matchPath({ path, end }, location.pathname);
+  };
+
+  const getNavLinkClass = (active: boolean) =>
     `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors group ${
-      isActive
+      active
         ? 'bg-primary/10 text-primary'
         : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-primary'
     }`;
 
-  const iconClass = (isActive: boolean) =>
+  const getIconClass = (active: boolean) =>
     `material-icons-round transition-colors ${
-      isActive ? '' : 'group-hover:text-primary'
+      active ? '' : 'group-hover:text-primary'
     }`;
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       {/* Sidebar Navigation */}
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-[#15202b] border-r border-slate-200 dark:border-slate-700
         transform transition-transform duration-300 lg:translate-x-0 lg:static flex flex-col
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-700">
+        <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-700 shrink-0">
           <div className="flex items-center gap-2 font-bold text-xl text-slate-800 dark:text-white">
             <span className="material-icons-round text-primary">apartment</span>
             <span>EstateAdmin</span>
           </div>
         </div>
 
-        <nav className="flex-1 px-4 py-6 space-y-1">
-          <NavLink to="/" className={navLinkClass} end>
-            {({ isActive }) => (
-              <>
-                <span className={iconClass(isActive)}>dashboard</span>
-                <span className="font-medium">Dashboard</span>
-              </>
+        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto no-scrollbar">
+          <Link to="/" className={getNavLinkClass(isLinkActive('/', true))}>
+            <span className={getIconClass(isLinkActive('/', true))}>dashboard</span>
+            <span className="font-medium">Dashboard</span>
+          </Link>
+          <Link to="/listings" className={getNavLinkClass(isLinkActive('/listings'))}>
+            <span className={getIconClass(isLinkActive('/listings'))}>list_alt</span>
+            <span className="font-medium">My Listings</span>
+          </Link>
+          <Link to="/listings/new" className={getNavLinkClass(isLinkActive('/listings/new'))}>
+            <span className={getIconClass(isLinkActive('/listings/new'))}>add_circle</span>
+            <span className="font-medium">New Listing</span>
+          </Link>
+          <Link to="/leads" className={getNavLinkClass(isLinkActive('/leads'))}>
+            <span className={getIconClass(isLinkActive('/leads'))}>people</span>
+            <span className="font-medium">Leads</span>
+            {newLeadsCount > 0 && (
+              <span className="ml-auto bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold px-2 py-0.5 rounded-full">
+                {newLeadsCount}
+              </span>
             )}
-          </NavLink>
-          <NavLink to="/listings" className={navLinkClass} end>
-            {({ isActive }) => (
-              <>
-                <span className={iconClass(isActive)}>list_alt</span>
-                <span className="font-medium">My Listings</span>
-              </>
-            )}
-          </NavLink>
-          <NavLink to="/listings/new" className={navLinkClass}>
-            {({ isActive }) => (
-              <>
-                <span className={iconClass(isActive)}>add_circle</span>
-                <span className="font-medium">New Listing</span>
-              </>
-            )}
-          </NavLink>
-          <NavLink to="/leads" className={navLinkClass}>
-            {({ isActive }) => (
-              <>
-                <span className={iconClass(isActive)}>people</span>
-                <span className="font-medium">Leads</span>
-                {newLeadsCount > 0 && (
-                  <span className="ml-auto bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs font-bold px-2 py-0.5 rounded-full">
-                    {newLeadsCount}
-                  </span>
-                )}
-              </>
-            )}
-          </NavLink>
-          <NavLink to="/settings" className={navLinkClass}>
-            {({ isActive }) => (
-              <>
-                <span className={iconClass(isActive)}>settings</span>
-                <span className="font-medium">Settings</span>
-              </>
-            )}
-          </NavLink>
+          </Link>
+          <Link to="/settings" className={getNavLinkClass(isLinkActive('/settings'))}>
+            <span className={getIconClass(isLinkActive('/settings'))}>settings</span>
+            <span className="font-medium">Settings</span>
+          </Link>
         </nav>
 
-        <div className="p-4 border-t border-slate-200 dark:border-slate-700">
+        <div className="p-4 border-t border-slate-200 dark:border-slate-700 shrink-0">
           <div className="flex items-center gap-3 px-2">
             <img
               alt="User Profile"
@@ -149,9 +148,9 @@ const Layout: React.FC = () => {
       )}
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-h-screen min-w-0">
+      <main className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
         {/* Sticky Header */}
-        <header className="h-16 bg-white/80 dark:bg-[#15202b]/90 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        <header className="h-16 bg-white/80 dark:bg-[#15202b]/90 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 sm:px-6 lg:px-8 shrink-0 z-40">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -216,7 +215,7 @@ const Layout: React.FC = () => {
                 )}
 
                 <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 mx-1 hidden sm:block"></div>
-                <span className="text-sm font-medium text-slate-600 dark:text-slate-300 hidden sm:block">Oct 24, 2023</span>
+                <span className="text-sm font-medium text-slate-600 dark:text-slate-300 hidden sm:block">{currentDate}</span>
               </div>
             )}
           </div>
@@ -224,7 +223,7 @@ const Layout: React.FC = () => {
 
         {/* Scrollable Content Container */}
         <div className={`flex-1 overflow-x-hidden ${location.pathname === '/leads' ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
-           <Outlet />
+           {children}
         </div>
       </main>
     </div>

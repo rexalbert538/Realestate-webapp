@@ -7,6 +7,7 @@ interface LeadsContextType {
   leads: Lead[];
   addLead: (lead: Lead) => void;
   deleteLead: (id: string) => void;
+  updateLeadStatus: (id: string, status: Lead['status']) => void;
 }
 
 const LeadsContext = createContext<LeadsContextType | undefined>(undefined);
@@ -61,8 +62,23 @@ export const LeadsProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const updateLeadStatus = (id: string, status: Lead['status']) => {
+    setLeads(prev => prev.map(l => l.id === id ? { ...l, status } : l));
+    const lead = leads.find(l => l.id === id);
+    if (lead) {
+        addActivity({
+            type: 'update',
+            title: 'Lead Status Updated',
+            description: `${lead.name} is now ${status}.`,
+            icon: 'label',
+            colorClass: 'text-indigo-600 dark:text-indigo-400',
+            bgClass: 'bg-indigo-100 dark:bg-indigo-900/30'
+        });
+    }
+  };
+
   return (
-    <LeadsContext.Provider value={{ leads, addLead, deleteLead }}>
+    <LeadsContext.Provider value={{ leads, addLead, deleteLead, updateLeadStatus }}>
       {children}
     </LeadsContext.Provider>
   );

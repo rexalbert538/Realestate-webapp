@@ -5,7 +5,7 @@ import { useLeads } from '../context/LeadsContext';
 
 const Leads: React.FC = () => {
   // Use Global Context
-  const { leads, addLead, deleteLead } = useLeads();
+  const { leads, addLead, deleteLead, updateLeadStatus } = useLeads();
   
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [showMobileDetail, setShowMobileDetail] = useState(false);
@@ -27,6 +27,10 @@ const Leads: React.FC = () => {
     status: 'New',
     source: 'Website'
   });
+
+  // Delete Modal State
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [leadToDeleteId, setLeadToDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     setHeaderActionsContainer(document.getElementById('header-actions'));
@@ -61,20 +65,31 @@ const Leads: React.FC = () => {
     setShowMobileDetail(false);
   };
 
-  const handleDeleteLead = () => {
-    if (!selectedLead) return;
-    if (window.confirm(`Are you sure you want to delete ${selectedLead.name}?`)) {
-      deleteLead(selectedLead.id);
-      if (showMobileDetail) setShowMobileDetail(false);
+  // Delete Logic
+  const initiateDelete = (id: string) => {
+    setLeadToDeleteId(id);
+    setIsDeleteModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (leadToDeleteId) {
+      deleteLead(leadToDeleteId);
+      setIsDeleteModalOpen(false);
       
-      // If we deleted the selected lead, select the next available or null
-      if (filteredLeads.length > 1) {
-          const nextLead = filteredLeads.find(l => l.id !== selectedLead.id);
+      // If we deleted the currently selected lead, update selection
+      if (selectedLeadId === leadToDeleteId) {
+          if (showMobileDetail) setShowMobileDetail(false);
+          // Find next available lead
+          const nextLead = filteredLeads.find(l => l.id !== leadToDeleteId);
           setSelectedLeadId(nextLead ? nextLead.id : null);
-      } else {
-          setSelectedLeadId(null);
       }
+      setLeadToDeleteId(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setLeadToDeleteId(null);
   };
 
   const handleCreateLead = (e: React.FormEvent) => {
@@ -104,6 +119,16 @@ const Leads: React.FC = () => {
     });
   };
 
+  const getStatusColor = (status: string) => {
+    switch(status) {
+        case 'New': return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400';
+        case 'Contacted': return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400';
+        case 'Qualified': return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400';
+        case 'Closed': return 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400';
+        default: return 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400';
+    }
+  };
+
   const HeaderButtons = () => (
     <>
         <button 
@@ -117,9 +142,38 @@ const Leads: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-1 overflow-hidden h-[calc(100vh-4rem)] relative">
+    <div className="flex flex-1 overflow-hidden h-full relative">
       {/* Portal Header Actions */}
       {headerActionsContainer && createPortal(<HeaderButtons />, headerActionsContainer)}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]">
+          <div className="bg-white dark:bg-[#15202b] rounded-xl shadow-2xl max-w-sm w-full p-6 border border-slate-200 dark:border-slate-700">
+            <div className="h-12 w-12 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center mb-4 mx-auto">
+              <span className="material-icons-round text-2xl">delete_forever</span>
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white text-center mb-2">Delete Lead?</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-center mb-6">
+              Are you sure you want to delete this lead? This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button 
+                onClick={cancelDelete}
+                className="flex-1 py-2.5 px-4 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-600 font-medium rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={confirmDelete}
+                className="flex-1 py-2.5 px-4 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 shadow-sm shadow-red-600/30 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Lead Modal */}
       {isAddModalOpen && (
@@ -262,16 +316,26 @@ const Leads: React.FC = () => {
                             {lead.source}
                         </span>
                     </td>
-                    <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium 
-                        ${lead.status === 'New' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' :
-                            lead.status === 'Contacted' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' :
-                            lead.status === 'Qualified' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400' :
-                            'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                        }`}>
-                        {lead.status === 'New' && <span className="h-1.5 w-1.5 rounded-full bg-green-500"></span>}
-                        {lead.status}
-                        </span>
+                    <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                        <div className="relative">
+                            <select
+                                value={lead.status}
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={(e) => updateLeadStatus(lead.id, e.target.value as any)}
+                                className={`appearance-none border-0 rounded-full text-xs font-medium px-3 py-1 pr-8 cursor-pointer focus:ring-2 focus:ring-primary/20 transition-all ${getStatusColor(lead.status)}`}
+                                style={{
+                                    backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                                    backgroundPosition: `right 0.5rem center`,
+                                    backgroundRepeat: `no-repeat`,
+                                    backgroundSize: `1.5em 1.5em`
+                                }}
+                            >
+                                <option value="New">New</option>
+                                <option value="Contacted">Contacted</option>
+                                <option value="Qualified">Qualified</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+                        </div>
                     </td>
                     <td className="px-6 py-4 text-right text-xs text-slate-500">
                         {lead.date}
@@ -335,7 +399,7 @@ const Leads: React.FC = () => {
                         {/* Simple Dropdown for Demo */}
                         <div className="absolute right-0 top-full mt-1 w-32 bg-white dark:bg-slate-800 shadow-lg rounded-lg border border-slate-200 dark:border-slate-700 hidden group-hover:block z-30">
                             <button 
-                                onClick={handleDeleteLead}
+                                onClick={() => selectedLead && initiateDelete(selectedLead.id)}
                                 className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md"
                             >
                                 Delete Lead

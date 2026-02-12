@@ -98,7 +98,7 @@ const AddListing: React.FC = () => {
     const newImages: string[] = [];
     const maxSizeBytes = 3 * 1024 * 1024; // 3MB
 
-    Array.from(files).forEach(file => {
+    Array.from(files).forEach((file: File) => {
       if (file.size > maxSizeBytes) {
         alert(`File "${file.name}" is too large. Maximum size is 3MB.`);
         return;

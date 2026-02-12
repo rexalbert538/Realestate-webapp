@@ -21,7 +21,7 @@ const ScrollToTop = () => {
   return null;
 };
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
@@ -46,19 +46,21 @@ const App: React.FC = () => {
               <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/" element={
+                <Route path="/*" element={
                   <ProtectedRoute>
-                    <Layout />
+                    <Layout>
+                      <Routes>
+                        <Route path="/" element={<Dashboard />} />
+                        <Route path="/listings" element={<Listings />} />
+                        <Route path="/listings/new" element={<AddListing />} />
+                        <Route path="/listings/edit/:id" element={<AddListing />} />
+                        <Route path="/leads" element={<Leads />} />
+                        <Route path="/settings" element={<Settings />} />
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                      </Routes>
+                    </Layout>
                   </ProtectedRoute>
-                }>
-                  <Route index element={<Dashboard />} />
-                  <Route path="listings" element={<Listings />} />
-                  <Route path="listings/new" element={<AddListing />} />
-                  <Route path="listings/edit/:id" element={<AddListing />} />
-                  <Route path="leads" element={<Leads />} />
-                  <Route path="settings" element={<Settings />} />
-                </Route>
-                <Route path="*" element={<Navigate to="/" replace />} />
+                } />
               </Routes>
             </HashRouter>
           </LeadsProvider>
