@@ -25,7 +25,7 @@ const Register: React.FC = () => {
 
     try {
       await register(name, email, password);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'An error occurred during registration');
     } finally {
@@ -39,10 +39,10 @@ const Register: React.FC = () => {
        <div className="hidden md:flex md:w-1/2 bg-cover bg-center relative" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuDNPt-bVjvWaKBYFU-m3ondZP6RWGV_zXkjZOLqWmTEmgqhTgMQS5e0sJrvMHLkKX-DFve6eO5GQ0_DzkyeFtCX3j5NEDZqFnJpVf0HLk2av4xgc_MnuxiKdlellEfnZxsgT-SOyxO4MJIfR1_VaZzJSkEcxafQBhy-f_ofk1ZX3X8iU1pSzAfYAOjkzXHAKQmckfcPKCL4jivi2fX5gaS-ETYSQoR3G7Elo0FRDTgDeqN0SMFBpQTklnUQwlMPGuQMxRLUXreWJw')" }}>
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent flex flex-col justify-end p-12 text-white">
              <div className="mb-8">
-                <div className="flex items-center space-x-2 mb-4">
+                <Link to="/" className="flex items-center space-x-2 mb-4">
                    <span className="material-icons-round text-primary text-4xl">apartment</span>
                    <span className="text-2xl font-bold tracking-tight">EstateAdmin</span>
-                </div>
+                </Link>
                 <h1 className="text-4xl font-bold mb-4 leading-tight">Empower your agency with smarter management tools.</h1>
                 <p className="text-slate-300 text-lg max-w-md">Join thousands of top-tier agents managing listings, clients, and closings from a single dashboard.</p>
              </div>

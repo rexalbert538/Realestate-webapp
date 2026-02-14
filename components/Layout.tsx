@@ -49,7 +49,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     if (matchPath("/listings/edit/:id", location.pathname)) return 'Edit Property';
     
     switch (location.pathname) {
-      case '/': return 'Dashboard Overview';
+      case '/dashboard': return 'Dashboard Overview';
       case '/listings': return 'My Listings Management';
       case '/listings/new': return 'Add New Property';
       case '/leads': return 'Leads Management';
@@ -83,15 +83,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-700 shrink-0">
-          <div className="flex items-center gap-2 font-bold text-xl text-slate-800 dark:text-white">
+          <Link to="/" className="flex items-center gap-2 font-bold text-xl text-slate-800 dark:text-white">
             <span className="material-icons-round text-primary">apartment</span>
             <span>EstateAdmin</span>
-          </div>
+          </Link>
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto no-scrollbar">
-          <Link to="/" className={getNavLinkClass(isLinkActive('/', true))}>
-            <span className={getIconClass(isLinkActive('/', true))}>dashboard</span>
+          <Link to="/dashboard" className={getNavLinkClass(isLinkActive('/dashboard', true))}>
+            <span className={getIconClass(isLinkActive('/dashboard', true))}>dashboard</span>
             <span className="font-medium">Dashboard</span>
           </Link>
           <Link to="/listings" className={getNavLinkClass(isLinkActive('/listings'))}>
@@ -167,7 +167,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
              <div id="header-actions" className="flex items-center gap-3"></div>
 
              {/* Dynamic Header Actions based on Route - Fallbacks */}
-            {location.pathname === '/' && (
+            {(location.pathname === '/dashboard') && (
               <div className="flex items-center gap-3 relative">
                 <button 
                     onClick={handleNotificationClick}

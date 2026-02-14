@@ -190,9 +190,9 @@ const Dashboard: React.FC = () => {
             <h2 className="text-lg font-bold text-slate-900 dark:text-white">Recent Activity</h2>
             <Link to="/settings" className="text-sm text-primary hover:text-blue-600 font-medium">View Settings</Link>
           </div>
-          <div className="space-y-6 relative max-h-[350px] overflow-y-auto pr-2">
+          <div className="space-y-6 relative">
             <div className="absolute left-4 top-2 bottom-2 w-0.5 bg-slate-100 dark:bg-slate-700"></div>
-            {activities.length > 0 ? activities.map((activity) => (
+            {activities.length > 0 ? activities.slice(0, 4).map((activity) => (
               <div key={activity.id} className="relative flex gap-4 animate-[fadeIn_0.3s_ease-out]">
                 <div className={`h-8 w-8 rounded-full border-2 border-white dark:border-[#15202b] flex items-center justify-center shrink-0 z-10 ${activity.bgClass}`}>
                   <span className={`material-icons-round text-sm ${activity.colorClass}`}>{activity.icon}</span>

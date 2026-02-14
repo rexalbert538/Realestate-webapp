@@ -19,7 +19,7 @@ const Login: React.FC = () => {
     try {
       const success = await login(email, password);
       if (success) {
-        navigate('/');
+        navigate('/dashboard');
       } else {
         setError('Invalid email or password');
       }
@@ -40,12 +40,12 @@ const Login: React.FC = () => {
             className="absolute inset-0 w-full h-full object-cover opacity-80" 
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/80 flex flex-col justify-between p-12 text-white">
-          <div className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <div className="bg-primary p-2 rounded-lg">
               <span className="material-icons-round text-white">apartment</span>
             </div>
             <span className="text-xl font-bold tracking-tight">EstateAdmin</span>
-          </div>
+          </Link>
           <div className="max-w-md space-y-4 mb-8">
             <div className="flex items-center gap-2 mb-2">
               <span className="px-3 py-1 bg-primary/30 backdrop-blur-sm border border-primary/40 rounded-full text-xs font-medium text-white">Latest Property</span>
